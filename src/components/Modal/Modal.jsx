@@ -1,39 +1,34 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import { Overlay, Content } from './Modal.styled';
 
-export class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleEscapeClick);
+export const Modal = ({ modalData, handleCloseModal }) => {
+  useEffect(() => {
+    const handleEscapeClick = event => {
+      if (event.code === 'Escape') {
+        handleCloseModal();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscapeClick);
     document.body.style.overflow = 'hidden';
-  }
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleEscapeClick);
-    document.body.style.overflow = 'auto';
-  }
+    return () => {
+      window.removeEventListener('keydown', handleEscapeClick);
+      document.body.style.overflow = 'auto';
+    };
+  }, [handleCloseModal]);
 
-  handleEscapeClick = event => {
-    if (event.code === 'Escape') {
-      this.props.handleCloseModal();
-    }
-  };
-
-  handleOverlayClick = event => {
+  const handleOverlayClick = event => {
     if (event.currentTarget === event.target) {
-      this.props.handleCloseModal();
+      handleCloseModal();
     }
   };
 
-  render() {
-    return (
-      <Overlay onClick={this.handleOverlayClick}>
-        <Content>
-          <img
-            src={this.props.modalData.largeImageURL}
-            alt={this.props.modalData.tags}
-          />
-        </Content>
-      </Overlay>
-    );
-  }
-}
+  return (
+    <Overlay onClick={handleOverlayClick}>
+      <Content>
+        <img src={modalData.largeImageURL} alt={modalData.tags} />
+      </Content>
+    </Overlay>
+  );
+};
