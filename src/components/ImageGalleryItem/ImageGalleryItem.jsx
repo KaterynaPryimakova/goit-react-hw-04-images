@@ -9,7 +9,7 @@ export const ImageGalleryItem = ({
   handleOpenModal,
 }) => {
   return (
-    <Item key={id}>
+    <Item id={id}>
       <ImageButton onClick={() => handleOpenModal({ tags, largeImageURL })}>
         <Image src={webformatURL} alt={tags} />
       </ImageButton>

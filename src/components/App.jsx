@@ -1,28 +1,26 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
-import { fetchImagesWithQuery } from 'api/api';
+import { fetchImagesWithQuery, PER_PAGE } from 'api/api';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
 import { Report } from 'notiflix/build/notiflix-report-aio';
 
-export class App extends Component {
-  state = {
-    searchQuery: '',
-    page: 1,
-    gallery: [],
-    error: null,
-    isLoading: false,
-    isModalOpen: false,
-    modalData: null,
-  };
+export const App = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [gallery, setGallery] = useState([]);
+  const [errorCase, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalData, setModalData] = useState(null);
+  const imageGalleryRef = useRef(null);
 
-  async componentDidUpdate(_, prevState) {
-    const { searchQuery, page } = this.state;
-
-    if (searchQuery !== prevState.searchQuery || page !== prevState.page) {
-      this.setState({ isLoading: true, error: null });
+  useEffect(() => {
+    async function getImages() {
+      if (searchQuery === '' && page === 1) return;
+      setIsLoading(true);
       try {
         const gallery = await fetchImagesWithQuery(searchQuery, page);
         if (gallery.length === 0) {
@@ -33,65 +31,60 @@ export class App extends Component {
           );
           return;
         }
-        this.setState(prevState => ({
-          gallery: [...prevState.gallery, ...gallery],
-        }));
+        setGallery(prevGallery => [...prevGallery, ...gallery]);
+
+        const cardHeight =
+          imageGalleryRef.current.firstChild.getBoundingClientRect().height;
+        window.scrollTo({
+          top: window.scrollY + cardHeight * 2,
+          behavior: 'smooth',
+        });
       } catch (error) {
-        this.setState({ error: error.message });
-        Report.failure('Error', `${error.message}`, 'Okay');
+        setError(error.message);
+        Report.failure('Error', `${errorCase}`, 'Okay');
       } finally {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       }
     }
-  }
+    getImages();
+  }, [searchQuery, page, errorCase]);
 
-  handleSubmit = searchQuery => {
-    this.setState({
-      searchQuery,
-      page: 1,
-      gallery: [],
-    });
+  const handleSubmit = searchQuery => {
+    setSearchQuery(searchQuery);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const handleLoadMore = () => {
+    setPage(page => page + 1);
   };
 
-  handleOpenModal = selectedImage => {
-    this.setState({
-      isModalOpen: true,
-      modalData: selectedImage,
-    });
+  const handleOpenModal = selectedImage => {
+    setIsModalOpen(true);
+    setModalData(selectedImage);
   };
 
-  handleCloseModal = () => {
-    this.setState({ isModalOpen: false });
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
-  render() {
-    const { isLoading, gallery, isModalOpen, modalData } = this.state;
-    return (
-      <>
-        <Searchbar onSubmit={this.handleSubmit} />
+  return (
+    <>
+      <Searchbar onSubmit={handleSubmit} />
 
-        <ImageGallery
-          searchResult={gallery}
-          handleOpenModal={this.handleOpenModal}
-        />
+      <ImageGallery
+        ref={imageGalleryRef}
+        searchResult={gallery}
+        handleOpenModal={handleOpenModal}
+      />
 
-        {isLoading && <Loader />}
+      {isLoading && <Loader />}
 
-        {!isLoading && gallery.length >= 12 && (
-          <Button onClick={this.handleLoadMore} title="Load more" />
-        )}
+      {!isLoading && gallery.length >= PER_PAGE && (
+        <Button onClick={handleLoadMore} title="Load more" />
+      )}
 
-        {isModalOpen && (
-          <Modal
-            modalData={modalData}
-            handleCloseModal={this.handleCloseModal}
-          />
-        )}
-      </>
-    );
-  }
-}
+      {isModalOpen && (
+        <Modal modalData={modalData} handleCloseModal={handleCloseModal} />
+      )}
+    </>
+  );
+};
