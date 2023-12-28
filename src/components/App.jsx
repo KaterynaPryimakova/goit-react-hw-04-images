@@ -32,13 +32,6 @@ export const App = () => {
           return;
         }
         setGallery(prevGallery => [...prevGallery, ...gallery]);
-
-        const cardHeight =
-          imageGalleryRef.current.firstChild.getBoundingClientRect().height;
-        window.scrollTo({
-          top: window.scrollY + cardHeight * 2,
-          behavior: 'smooth',
-        });
       } catch (error) {
         setError(error.message);
         Report.failure('Error', `${errorCase}`, 'Okay');
@@ -47,6 +40,15 @@ export const App = () => {
       }
     }
     getImages();
+
+    if (imageGalleryRef.current) {
+      const cardHeight =
+        imageGalleryRef.current.firstChild.getBoundingClientRect().height;
+      window.scrollTo({
+        top: window.scrollY + cardHeight * 2,
+        behavior: 'smooth',
+      });
+    }
   }, [searchQuery, page, errorCase]);
 
   const handleSubmit = searchQuery => {
