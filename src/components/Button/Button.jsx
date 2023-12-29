@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { Btn } from './Button.styled';
 
-export const Button = ({ title, onClick }) => {
-  return <Btn onClick={onClick}>{title}</Btn>;
-};
+export const Button = forwardRef(({ title, onClick }, ref) => {
+  return (
+    <Btn ref={ref} onClick={onClick}>
+      {title}
+    </Btn>
+  );
+});

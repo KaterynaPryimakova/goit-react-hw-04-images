@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
@@ -15,6 +15,7 @@ export const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState(null);
+  const buttonRef = useRef();
 
   useEffect(() => {
     async function getImages() {
@@ -49,6 +50,7 @@ export const App = () => {
 
   const handleLoadMore = () => {
     setPage(page => page + 1);
+    buttonRef.current.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleOpenModal = selectedImage => {
@@ -69,7 +71,7 @@ export const App = () => {
       {isLoading && <Loader />}
 
       {!isLoading && gallery.length >= PER_PAGE && (
-        <Button onClick={handleLoadMore} title="Load more" />
+        <Button ref={buttonRef} onClick={handleLoadMore} title="Load more" />
       )}
 
       {isModalOpen && (
