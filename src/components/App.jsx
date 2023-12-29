@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
@@ -11,11 +11,10 @@ export const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [gallery, setGallery] = useState([]);
-  const [errorCase, setError] = useState(null);
+  const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState(null);
-  const imageGalleryRef = useRef(null);
 
   useEffect(() => {
     async function getImages() {
@@ -34,25 +33,18 @@ export const App = () => {
         setGallery(prevGallery => [...prevGallery, ...gallery]);
       } catch (error) {
         setError(error.message);
-        Report.failure('Error', `${errorCase}`, 'Okay');
+        Report.failure('Error', `${error.message}`, 'Okay');
       } finally {
         setIsLoading(false);
       }
     }
     getImages();
-
-    if (imageGalleryRef.current) {
-      const cardHeight =
-        imageGalleryRef.current.firstChild.getBoundingClientRect().height;
-      window.scrollTo({
-        top: window.scrollY + cardHeight * 2,
-        behavior: 'smooth',
-      });
-    }
-  }, [searchQuery, page, errorCase]);
+  }, [searchQuery, page, error]);
 
   const handleSubmit = searchQuery => {
     setSearchQuery(searchQuery);
+    setPage(1);
+    setGallery([]);
   };
 
   const handleLoadMore = () => {
@@ -72,11 +64,7 @@ export const App = () => {
     <>
       <Searchbar onSubmit={handleSubmit} />
 
-      <ImageGallery
-        ref={imageGalleryRef}
-        searchResult={gallery}
-        handleOpenModal={handleOpenModal}
-      />
+      <ImageGallery searchResult={gallery} handleOpenModal={handleOpenModal} />
 
       {isLoading && <Loader />}
 
