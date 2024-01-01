@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+// import { useRef } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
@@ -15,8 +16,8 @@ export const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState(null);
-  const galleryRef = useRef(null);
-  const prevGalleryHeightRef = useRef(0);
+  // const galleryRef = useRef(null);
+  // const prevGalleryHeightRef = useRef(0);
 
   useEffect(() => {
     async function getImages() {
@@ -81,7 +82,7 @@ export const App = () => {
       <Searchbar onSubmit={handleSubmit} />
 
       <ImageGallery
-        ref={galleryRef}
+        // ref={galleryRef}
         searchResult={gallery}
         handleOpenModal={handleOpenModal}
       />
