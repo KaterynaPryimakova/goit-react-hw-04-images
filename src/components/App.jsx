@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
@@ -15,6 +15,8 @@ export const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState(null);
+  const galleryRef = useRef(null);
+  const prevGalleryHeightRef = useRef(0);
 
   useEffect(() => {
     async function getImages() {
@@ -30,6 +32,7 @@ export const App = () => {
           );
           return;
         }
+
         setGallery(prevGallery => [...prevGallery, ...gallery]);
       } catch (error) {
         setError(error.message);
@@ -40,6 +43,19 @@ export const App = () => {
     }
     getImages();
   }, [searchQuery, page, error]);
+
+  // useEffect(() => {
+  //   const galleryHeight = galleryRef.current.offsetHeight;
+  //   const differenceHeight = galleryHeight - prevGalleryHeightRef.current;
+
+  //   prevGalleryHeightRef.current = galleryHeight;
+  //   if (differenceHeight > 0) {
+  //     window.scrollBy({
+  //       top: differenceHeight,
+  //       behavior: 'smooth',
+  //     });
+  //   }
+  // }, [gallery]);
 
   const handleSubmit = searchQuery => {
     setSearchQuery(searchQuery);
@@ -64,7 +80,11 @@ export const App = () => {
     <>
       <Searchbar onSubmit={handleSubmit} />
 
-      <ImageGallery searchResult={gallery} handleOpenModal={handleOpenModal} />
+      <ImageGallery
+        ref={galleryRef}
+        searchResult={gallery}
+        handleOpenModal={handleOpenModal}
+      />
 
       {isLoading && <Loader />}
 
